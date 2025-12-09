@@ -56,7 +56,7 @@
 
         <!-- Loader Principal -->
         <div id="loader" class="flex flex-col items-center justify-center">
-             <svg class="animate-spin h-12 w-12 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg class="animate-spin h-12 w-12 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
@@ -145,7 +145,7 @@
                     });
                     dataRows.push(entry);
                 } else {
-                     console.warn(`Fila ${i + 1} ignorada: el número de columnas (${values.length}) no coincide con el encabezado (${headers.length}).`);
+                    console.warn(`Fila ${i + 1} ignorada: el número de columnas (${values.length}) no coincide con el encabezado (${headers.length}).`);
                 }
             }
             return dataRows;
@@ -196,9 +196,21 @@
             return parseFloat(valueStr.replace(/,/g, '.').replace(/[^\d.-]/g, '')) || 0;
         }
 
+        // ========= NUEVO: pestaña "Dashboard" + pestañas dinámicas =========
         function createTabs(data) {
             tabsContainer.innerHTML = '';
-            Object.keys(data).forEach((objectiveKey, index) => {
+            const objectiveKeys = Object.keys(data);
+
+            // Pestaña fija "Dashboard"
+            const dashboardBtn = document.createElement('button');
+            dashboardBtn.textContent = 'Dashboard';
+            dashboardBtn.className = 'px-4 py-2 font-semibold text-sm rounded-t-lg border-b-2 transition-colors duration-300 tab-inactive';
+            dashboardBtn.dataset.objective = '__dashboard__';
+            dashboardBtn.addEventListener('click', () => switchTab('__dashboard__'));
+            tabsContainer.appendChild(dashboardBtn);
+
+            // Pestañas por objetivo (la primera sigue siendo la activa por defecto)
+            objectiveKeys.forEach((objectiveKey, index) => {
                 const button = document.createElement('button');
                 button.textContent = objectiveKey;
                 button.className = `px-4 py-2 font-semibold text-sm rounded-t-lg border-b-2 transition-colors duration-300 ${index === 0 ? 'tab-active' : 'tab-inactive'}`;
@@ -208,30 +220,59 @@
             });
         }
 
+        // ========= NUEVO: contenido para la pestaña "Dashboard" =========
         function createContent(data) {
             contentContainer.innerHTML = '';
-            Object.keys(data).forEach((objectiveKey, index) => {
+
+            const objectiveKeys = Object.keys(data);
+            const firstObjectiveKey = objectiveKeys[0];
+
+            // Contenido del Dashboard (Looker Studio) - oculto por defecto
+            const dashboardContentDiv = document.createElement('div');
+            dashboardContentDiv.id = 'content-__dashboard__';
+            dashboardContentDiv.className = 'hidden';
+            dashboardContentDiv.innerHTML = `
+                <div class="bg-white p-4 rounded-lg shadow-sm mb-6 border-l-4 border-indigo-500">
+                    <h2 class="text-xl font-bold text-gray-800">Dashboard general CECP</h2>
+                    <p class="mt-1 text-gray-600">Vista consolidada de indicadores en Looker Studio.</p>
+                </div>
+                <div class="w-full">
+                    <iframe
+                        width="100%"
+                        style="height: 70vh;"
+                        src="https://lookerstudio.google.com/embed/reporting/eced3bb4-5c58-4246-aff2-4256077757bd/page/DCWcF"
+                        frameborder="0"
+                        class="rounded-xl border border-gray-200 shadow-sm"
+                        allowfullscreen
+                        sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
+                    </iframe>
+                </div>
+            `;
+            contentContainer.appendChild(dashboardContentDiv);
+
+            // Contenido por objetivo (el primero visible por defecto)
+            objectiveKeys.forEach((objectiveKey, index) => {
                 const objectiveData = data[objectiveKey];
                 const color = objectiveData.color;
                 
                 const contentWrapper = document.createElement('div');
                 contentWrapper.id = `content-${objectiveKey.replace(/\s+/g, '-')}`;
-                contentWrapper.className = ` ${index !== 0 ? 'hidden' : ''}`;
+                contentWrapper.className = index !== 0 ? 'hidden' : '';
 
                 let indicatorsHTML = objectiveData.indicators.map(indicator => {
                     let progressHTML = '';
                     if (indicator.subGoals.length > 0) {
                         if (indicator.subGoals.length === 1) {
-                             const subGoal = indicator.subGoals[0];
-                             const metaValue = parseValue(subGoal.goal);
-                             const currentValue = parseValue(subGoal.current);
-                             let completionPercentage = metaValue > 0 ? (currentValue / metaValue) * 100 : 0;
-                             if (subGoal.goal && subGoal.goal.includes('≤')) {
+                            const subGoal = indicator.subGoals[0];
+                            const metaValue = parseValue(subGoal.goal);
+                            const currentValue = parseValue(subGoal.current);
+                            let completionPercentage = metaValue > 0 ? (currentValue / metaValue) * 100 : 0;
+                            if (subGoal.goal && subGoal.goal.includes('≤')) {
                                 completionPercentage = metaValue > 0 ? Math.max(0, (1 - (currentValue - metaValue) / metaValue)) * 100 : 0;
-                             }
-                             const displayPercentage = Math.round(completionPercentage);
-                             const progressBarWidth = Math.min(100, displayPercentage);
-                             progressHTML = `
+                            }
+                            const displayPercentage = Math.round(completionPercentage);
+                            const progressBarWidth = Math.min(100, displayPercentage);
+                            progressHTML = `
                                 <div class="bg-gray-50 rounded-lg p-3 space-y-3">
                                     <div class="flex items-center text-sm">
                                         <span class="font-semibold text-gray-600 w-1/3">Meta:</span>
@@ -251,7 +292,7 @@
                                         <div class="bg-${color}-500 h-2.5 rounded-full progress-bar" style="width: ${progressBarWidth}%"></div>
                                     </div>
                                 </div>
-                             `;
+                            `;
                         } else { 
                             progressHTML = '<div class="bg-gray-50 rounded-lg p-4 space-y-4">' + indicator.subGoals.map(subGoal => {
                                 const metaValue = parseValue(subGoal.goal);
@@ -323,14 +364,25 @@
             });
         }
 
-        function switchTab(objectiveKey) {
+        function switchTab(key) {
+            // Actualizar estilos de pestañas
             tabsContainer.querySelectorAll('button').forEach(button => {
-                button.classList.toggle('tab-active', button.dataset.objective === objectiveKey);
-                button.classList.toggle('tab-inactive', button.dataset.objective !== objectiveKey);
+                const isActive = button.dataset.objective === key;
+                button.classList.toggle('tab-active', isActive);
+                button.classList.toggle('tab-inactive', !isActive);
             });
+
+            // Ocultar todo el contenido
             contentContainer.querySelectorAll('div[id^="content-"]').forEach(content => {
-                content.classList.toggle('hidden', content.id !== `content-${objectiveKey.replace(/\s+/g, '-')}`);
+                content.classList.add('hidden');
             });
+
+            // Normalizar clave para encontrar el contenido
+            const normalizedKey = key === '__dashboard__' ? '__dashboard__' : key.replace(/\s+/g, '-');
+            const activeContent = document.getElementById(`content-${normalizedKey}`);
+            if (activeContent) {
+                activeContent.classList.remove('hidden');
+            }
         }
 
         function toggleDetails(button, indicatorId) {
@@ -347,7 +399,7 @@
                 }
                 const csvText = await response.text();
                 if (csvText.trim().split('\n').length < 2) {
-                     throw new Error("El archivo CSV está vacío o no tiene datos.");
+                    throw new Error("El archivo CSV está vacío o no tiene datos.");
                 }
                 const flatData = parseCSV(csvText);
                 const groupedData = groupDataByObjective(flatData);
