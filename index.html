@@ -3,441 +3,421 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cronograma de Estudio 2026</title>
-    <!-- Tailwind CSS para el diseño -->
+    <title>Infograma de Indicadores por Objetivos Estratégicos</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome para los iconos -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        select { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-right: 2.5rem; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* gray-100 */
+        }
+        .tab-active {
+            border-color: #4f46e5; /* indigo-600 */
+            color: #4f46e5;
+            background-color: #eef2ff; /* indigo-50 */
+        }
+        .tab-inactive {
+            border-color: transparent;
+            color: #4b5563; /* gray-600 */
+        }
+        .details-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .details-section.open {
+            max-height: 500px; /* Adjust as needed */
+        }
+        .details-button {
+            background-color: #eef2ff; /* indigo-50 */
+            color: #4f46e5; /* indigo-600 */
+            transition: background-color 0.3s ease;
+        }
+        .details-button:hover {
+            background-color: #e0e7ff; /* indigo-100 */
+        }
+        #loader {
+            height: 60vh;
+        }
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen pb-12">
+<body class="text-gray-800">
 
-    <!-- Encabezado con degradado -->
-    <header class="bg-gradient-to-r from-indigo-600 to-blue-600 text-white py-16 px-4 shadow-lg">
-        <div class="max-w-6xl mx-auto text-center">
-            <h1 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">Cronograma de Estudio</h1>
-            <p class="text-xl md:text-2xl text-blue-100 max-w-2xl mx-auto font-semibold tracking-wide">Preicfes Saber 11 de la UNAL</p>
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900">Dashboard de Indicadores CECP 2025</h1>
+            <p class="text-lg text-gray-600 mt-2">Análisis por Objetivos Estratégicos con Seguimiento en Vivo</p>
+        </header>
+
+        <!-- Loader Principal -->
+        <div id="loader" class="flex flex-col items-center justify-center">
+            <svg class="animate-spin h-12 w-12 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="mt-4 text-gray-600">Cargando datos de los indicadores...</p>
         </div>
-    </header>
+        
+        <!-- Contenido del Dashboard (inicialmente oculto) -->
+        <div id="dashboard-content" class="hidden">
+            <!-- Contenedor de Pestañas -->
+            <div class="mb-8">
+                <div id="tabs-container" class="flex flex-wrap items-center justify-center gap-2 border-b border-gray-200">
+                    <!-- Las pestañas se generarán aquí -->
+                </div>
+            </div>
 
-    <!-- Sección de Filtros -->
-    <div class="max-w-6xl mx-auto px-4 -mt-8 relative z-10">
-        <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col md:flex-row gap-6 items-center justify-between border border-slate-100">
-            <div class="flex-1 w-full relative">
-                <label class="block text-sm font-semibold text-slate-600 mb-2" for="monthFilter">
-                    <i class="far fa-calendar-alt mr-1"></i> Filtrar por Mes
-                </label>
-                <select id="monthFilter" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-slate-50 transition-colors cursor-pointer">
-                    <option value="all">🗓️ Todos los meses</option>
-                    <!-- Las opciones se inyectan por JS -->
-                </select>
-            </div>
-            
-            <div class="flex-1 w-full relative">
-                <label class="block text-sm font-semibold text-slate-600 mb-2" for="areaFilter">
-                    <i class="fas fa-layer-group mr-1"></i> Filtrar por Área
-                </label>
-                <select id="areaFilter" class="w-full border border-slate-300 rounded-lg px-4 py-3 text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none bg-slate-50 transition-colors cursor-pointer">
-                    <option value="all">📚 Todas las áreas</option>
-                    <!-- Las opciones se inyectan por JS -->
-                </select>
-            </div>
-            
-            <div class="w-full md:w-auto mt-2 md:mt-0 pt-6 text-center md:text-right">
-                <span class="inline-block bg-indigo-50 text-indigo-700 font-medium px-4 py-2 rounded-full text-sm shadow-sm" id="resultsCount">
-                    Cargando clases...
-                </span>
+            <!-- Contenedor de Contenido de Pestañas -->
+            <div id="tab-content-container">
+                <!-- El contenido de las pestañas se generará aquí -->
             </div>
         </div>
     </div>
 
-    <!-- Contenedor Principal del Cronograma -->
-    <main class="max-w-6xl mx-auto px-4 mt-12">
-        <div id="schedule-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Las tarjetas se generan dinámicamente aquí -->
-        </div>
-
-        <!-- Estado de "Sin Resultados" -->
-        <div id="no-results" class="hidden flex flex-col items-center justify-center py-20">
-            <div class="bg-slate-100 p-6 rounded-full mb-4">
-                <i class="fas fa-search text-4xl text-slate-400"></i>
-            </div>
-            <h3 class="text-2xl font-semibold text-slate-700">No se encontraron sesiones</h3>
-            <p class="text-slate-500 mt-2 text-center max-w-md">Intenta ajustar los filtros de búsqueda o seleccionar un mes y área diferentes.</p>
-            <button onclick="resetFilters()" class="mt-6 text-indigo-600 font-medium hover:text-indigo-800 transition-colors">
-                Limpiar filtros
-            </button>
-        </div>
-    </main>
-
     <script>
-        // =========================================================================
+        // =================================================================================
+        // CONFIGURACIÓN
+        // URL de la hoja de Google Sheets publicada como CSV.
+        // =================================================================================
+        const googleSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWUlWgnm2V7Zv3PkMZiixwwl-FXZMMd7qROZipfkjcVFLgojGoRvFwP6ECgsiAVJFOV5umTR2dBL9f/pub?output=csv';
 
-        // =========================================================================
-        const GOOGLE_SHEETS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRqGcVYnfCKAlgYksSBlCLoOxox6Msrok1eSmsEsyDe5S8zscqL0z9UUMxhhPq2Wg/pub?output=csv"; 
-
-        // =========================================================================
-        // Datos de respaldo (Se usarán si no has puesto el enlace de Google Sheets arriba)
-        // =========================================================================
-        const fallbackData = `Fecha;Día;Horario;Área;Tema / Evento
-23-feb;Lunes;5:00 p.m. a 7:00 p.m.;Biología;Método Científico y Célula
-24-feb;Martes;5:00 p.m. a 7:00 p.m.;Biología;Procesos Celulares (Respiración, Fotosíntesis)
-25-feb;Miércoles;5:00 p.m. a 7:00 p.m.;CANCELADO;Clase Cancelada
-26-feb;Jueves;5:00 p.m. a 7:00 p.m.;Biología;Genética I (Leyes de Mendel)
-28-feb;Sábado;8:00 a.m. a 10:00 a.m.;Biología;Genética II (ADN y ARN)
-2-mar;Lunes;5:00 p.m. a 7:00 p.m.;Sociales;Historia y Geografía base
-3-mar;Martes;5:00 p.m. a 7:00 p.m.;Sociales;Geografía Económica
-4-mar;Miércoles;5:00 p.m. a 7:00 p.m.;Sociales;Historia Universal y Latinoamericana
-5-mar;Jueves;5:00 p.m. a 7:00 p.m.;Sociales;Constitución Política de 1991
-7-mar;Sábado;8:00 a.m. a 10:00 a.m.;SIMULACRO;📌 PRIMER SIMULACRO (DIAGNÓSTICO)
-9-mar;Lunes;5:00 p.m. a 7:00 p.m.;Biología;Organismos y Clasificación
-10-mar;Martes;5:00 p.m. a 7:00 p.m.;Biología;Sistemas del Cuerpo Humano I
-11-mar;Miércoles;5:00 p.m. a 7:00 p.m.;Biología;Sistemas del Cuerpo Humano II
-12-mar;Jueves;5:00 p.m. a 7:00 p.m.;Biología;Ecosistemas y Poblaciones
-14-mar;Sábado;8:00 a.m. a 10:00 a.m.;Biología;Evolución y origen de la vida
-16-mar;Lunes;5:00 p.m. a 7:00 p.m.;Sociales;Derechos y Deberes Fundamentales
-17-mar;Martes;5:00 p.m. a 7:00 p.m.;Sociales;Mecanismos de Participación
-18-mar;Miércoles;5:00 p.m. a 7:00 p.m.;Sociales;Competencias Ciudadanas I
-19-mar;Jueves;5:00 p.m. a 7:00 p.m.;Sociales;Análisis de Perspectivas
-21-mar;Sábado;8:00 a.m. a 10:00 a.m.;Lectura Crítica;Comprensión a nivel local
-23-mar;Lunes;5:00 p.m. a 7:00 p.m.;FESTIVO;Día de San José - No hay clase
-24-mar;Martes;5:00 p.m. a 7:00 p.m.;Lectura Crítica;Comprensión a nivel global
-25-mar;Miércoles;5:00 p.m. a 7:00 p.m.;Lectura Crítica;Intención comunicativa
-26-mar;Jueves;5:00 p.m. a 7:00 p.m.;Lectura Crítica;Tipologías Textuales
-28-mar;Sábado;8:00 a.m. a 10:00 a.m.;Lectura Crítica;Textos Discontinuos (Infografías)
-6-abr;Lunes;5:00 p.m. a 7:00 p.m.;Lectura Crítica;Argumentación y premisas
-7-abr;Martes;5:00 p.m. a 7:00 p.m.;Lectura Crítica;Validez de argumentos
-8-abr;Miércoles;5:00 p.m. a 7:00 p.m.;Lectura Crítica;Estrategias discursivas
-9-abr;Jueves;5:00 p.m. a 7:00 p.m.;Lectura Crítica;Lectura filosófica
-11-abr;Sábado;8:00 a.m. a 10:00 a.m.;Lectura Crítica;Intertextualidad
-13-abr;Lunes;5:00 p.m. a 7:00 p.m.;Lectura Crítica;Evaluación de contenidos
-14-abr;Martes;5:00 p.m. a 7:00 p.m.;Lectura Crítica;Ensayo y Columna de opinión
-15-abr;Miércoles;5:00 p.m. a 7:00 p.m.;Lectura Crítica;Taller Intensivo de lectura
-16-abr;Jueves;5:00 p.m. a 7:00 p.m.;Lectura Crítica;Cierre de Módulo
-18-abr;Sábado;8:00 a.m. a 10:00 a.m.;Lectura Crítica;Taller final de repaso
-20-abr;Lunes;5:00 p.m. a 7:00 p.m.;Matemáticas;Álgebra básica y expresiones
-21-abr;Martes;5:00 p.m. a 7:00 p.m.;Matemáticas;Funciones y relaciones
-22-abr;Miércoles;5:00 p.m. a 7:00 p.m.;Matemáticas;Función Lineal y Cuadrática
-23-abr;Jueves;5:00 p.m. a 7:00 p.m.;Matemáticas;Exponenciales y Logaritmos
-25-abr;Sábado;8:00 a.m. a 10:00 a.m.;Matemáticas;Geometría Plana (Áreas y Perímetros)
-27-abr;Lunes;5:00 p.m. a 7:00 p.m.;Matemáticas;Sólidos y Volúmenes
-28-abr;Martes;5:00 p.m. a 7:00 p.m.;Matemáticas;Teorema de Pitágoras
-29-abr;Miércoles;5:00 p.m. a 7:00 p.m.;Matemáticas;Razones Trigonométricas
-30-abr;Jueves;5:00 p.m. a 7:00 p.m.;Matemáticas;Estadística Descriptiva
-1-may;Viernes;5:00 p.m. a 7:00 p.m.;FESTIVO;Día del Trabajo
-2-may;Sábado;8:00 a.m. a 10:00 a.m.;Matemáticas;Probabilidad y azar
-4-may;Lunes;5:00 p.m. a 7:00 p.m.;Matemáticas;Conteo y Combinatoria
-5-may;Martes;5:00 p.m. a 7:00 p.m.;🗣️ CHARLA 1;El Mapa del Éxito (Estructura ICFES)
-6-may;Miércoles;5:00 p.m. a 7:00 p.m.;Matemáticas;Interpretación de Gráficas
-7-may;Jueves;5:00 p.m. a 7:00 p.m.;Matemáticas;Cierre de Módulo
-9-may;Sábado;8:00 a.m. a 10:00 a.m.;SIMULACRO;📌 SEGUNDO SIMULACRO (INTERMEDIO)
-11-may;Lunes;5:00 p.m. a 7:00 p.m.;Matemáticas;Taller Práctico Final
-12-may;Martes;5:00 p.m. a 7:00 p.m.;🗣️ CHARLA 2;Mente de Acero (Ansiedad y Estrés)
-13-may;Miércoles;5:00 p.m. a 7:00 p.m.;Sociales;Globalización y Economía
-14-may;Jueves;5:00 p.m. a 7:00 p.m.;Sociales;Problemáticas Sociales
-16-may;Sábado;8:00 a.m. a 10:00 a.m.;Sociales;Violencia y Sociedad en Colombia
-18-may;Lunes;5:00 p.m. a 7:00 p.m.;FESTIVO;Día de la Ascensión
-19-may;Martes;5:00 p.m. a 7:00 p.m.;🗣️ CHARLA 3;Foco de Atleta (Concentración)
-20-may;Miércoles;5:00 p.m. a 7:00 p.m.;Sociales;Competencias Ciudadanas II
-21-may;Jueves;5:00 p.m. a 7:00 p.m.;Sociales;Cierre de Módulo
-23-may;Sábado;8:00 a.m. a 10:00 a.m.;Biología;CTS (Ciencia, Tec, Sociedad)
-25-may;Lunes;5:00 p.m. a 7:00 p.m.;FESTIVO;Corpus Christi
-26-may;Martes;5:00 p.m. a 7:00 p.m.;🗣️ CHARLA 4;El Arte de la Duda (Estrategia)
-27-may;Miércoles;5:00 p.m. a 7:00 p.m.;Biología;CTS (Ciencia, Tec, Sociedad)
-28-may;Jueves;5:00 p.m. a 7:00 p.m.;Biología;CTS (Ciencia, Tec, Sociedad)
-30-may;Sábado;8:00 a.m. a 10:00 a.m.;Química;Estructura de la Materia
-1-jun;Lunes;5:00 p.m. a 7:00 p.m.;Química;Tabla Periódica
-2-jun;Martes;5:00 p.m. a 7:00 p.m.;Química;Enlaces Químicos
-3-jun;Miércoles;5:00 p.m. a 7:00 p.m.;Química;Nomenclatura Inorgánica
-4-jun;Jueves;5:00 p.m. a 7:00 p.m.;Química;Reacciones Químicas
-6-jun;Sábado;8:00 a.m. a 10:00 a.m.;Química;Estequiometría
-8-jun;Lunes;5:00 p.m. a 7:00 p.m.;FESTIVO;Sagrado Corazón
-9-jun;Martes;5:00 p.m. a 7:00 p.m.;Química;Gases ideales
-10-jun;Miércoles;5:00 p.m. a 7:00 p.m.;Química;Soluciones y Mezclas
-11-jun;Jueves;5:00 p.m. a 7:00 p.m.;Química;Química Orgánica y Cierre
-13-jun;Sábado;8:00 a.m. a 10:00 a.m.;Física;Cinemática (MRU, MRUA)
-15-jun;Lunes;5:00 p.m. a 7:00 p.m.;FESTIVO;Día no laboral
-16-jun;Martes;5:00 p.m. a 7:00 p.m.;Física;Dinámica (Leyes de Newton)
-17-jun;Miércoles;5:00 p.m. a 7:00 p.m.;Física;Energía Mecánica
-18-jun;Jueves;5:00 p.m. a 7:00 p.m.;Física;Ondas y Sonido
-20-jun;Sábado;8:00 a.m. a 10:00 a.m.;Física;Termodinámica
-22-jun;Lunes;5:00 p.m. a 7:00 p.m.;Física;Electromagnetismo I
-23-jun;Martes;5:00 p.m. a 7:00 p.m.;Física;Electromagnetismo II
-24-jun;Miércoles;5:00 p.m. a 7:00 p.m.;Física;Circuitos Eléctricos
-25-jun;Jueves;5:00 p.m. a 7:00 p.m.;Física;Cierre de Módulo
-27-jun;Sábado;8:00 a.m. a 10:00 a.m.;Inglés;Vocabulario y Sinónimos
-29-jun;Lunes;5:00 p.m. a 7:00 p.m.;FESTIVO;San Pedro y San Pablo
-30-jun;Martes;5:00 p.m. a 7:00 p.m.;Inglés;Gramática Básica
-1-jul;Miércoles;5:00 p.m. a 7:00 p.m.;Inglés;Intención Comunicativa
-2-jul;Jueves;5:00 p.m. a 7:00 p.m.;Inglés;Propósito del Texto
-4-jul;Sábado;8:00 a.m. a 10:00 a.m.;Inglés;Contextos de Conversación
-6-jul;Lunes;5:00 p.m. a 7:00 p.m.;Inglés;Completar Conversaciones
-7-jul;Martes;5:00 p.m. a 7:00 p.m.;🗣️ CHARLA 5;Estrategia Final: Gestión del Tiempo
-8-jul;Miércoles;5:00 p.m. a 7:00 p.m.;Inglés;Interpretación de Avisos
-9-jul;Jueves;5:00 p.m. a 7:00 p.m.;Inglés;Lectura de Artículos
-11-jul;Sábado;8:00 a.m. a 10:00 a.m.;SIMULACRO;📌 TERCER SIMULACRO (FINAL)
-13-jul;Lunes;5:00 p.m. a 7:00 p.m.;Inglés;Idea General del Texto
-14-jul;Martes;5:00 p.m. a 7:00 p.m.;🗣️ CHARLA 6;Día Cero: Preparación Mental Final
-15-jul;Miércoles;5:00 p.m. a 7:00 p.m.;Inglés;Información Específica
-16-jul;Jueves;5:00 p.m. a 7:00 p.m.;Inglés;Práctica Parte 4 y 5
-18-jul;Sábado;8:00 a.m. a 10:00 a.m.;Inglés;Práctica Parte 6 y 7
-20-jul;Lunes;5:00 p.m. a 7:00 p.m.;FESTIVO;Día de la Independencia
-21-jul;Martes;5:00 p.m. a 7:00 p.m.;Inglés;Taller Final Tipo Examen
-22-jul;Miércoles;5:00 p.m. a 7:00 p.m.;Inglés;Cierre de Módulo
-23-jul;Jueves;5:00 p.m. a 7:00 p.m.;EVENTO;🎉 CLAUSURA DEL CURSO`;
-
-        // 1. Función Inteligente para procesar el CSV (Soporta comas de Google Sheets o punto y coma)
-        function parseCSV(str) {
-            const arr = [];
-            let quote = false;
-            let row = 0, col = 0;
-            // Detecta automáticamente si se usan comas o punto y coma
-            const delimiter = (str.indexOf(';') !== -1 && str.indexOf(';') < str.indexOf('\n')) ? ';' : ',';
-
-            for (let c = 0; c < str.length; c++) {
-                let cc = str[c], nc = str[c+1];
-                arr[row] = arr[row] || [];
-                arr[row][col] = arr[row][col] || '';
-                if (cc == '"' && quote && nc == '"') { arr[row][col] += cc; ++c; continue; }
-                if (cc == '"') { quote = !quote; continue; }
-                if (cc == delimiter && !quote) { ++col; continue; } 
-                if (cc == '\r' && nc == '\n' && !quote) { ++row; col = 0; ++c; continue; }
-                if (cc == '\n' && !quote) { ++row; col = 0; continue; }
-                if (cc == '\r' && !quote) { ++row; col = 0; continue; }
-                arr[row][col] += cc;
-            }
-            return arr;
-        }
-
-        // 2. Utilidades de Fecha
-        const monthsNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        const objectiveColors = {
+            "Gestión Eficiente": "indigo",
+            "Oferta Pertinente": "emerald",
+            "Articulación Institucional": "rose",
+            "Posicionamiento": "sky",
+            "Gestión Financiera": "amber"
+        };
         
-        function standardizeDate(dateStr) {
-            const parts = dateStr.toLowerCase().split('-');
-            if(parts.length === 2) {
-                const day = parts[0].padStart(2, '0');
-                const monthMap = { 'ene': '01', 'feb': '02', 'mar': '03', 'abr': '04', 'may': '05', 'jun': '06', 'jul': '07', 'ago': '08', 'sep': '09', 'oct': '10', 'nov': '11', 'dic': '12' };
-                const month = monthMap[parts[1]] || '01';
-                return `2026-${month}-${day}`; 
-            }
-            return dateStr;
-        }
+        const tabsContainer = document.getElementById('tabs-container');
+        const contentContainer = document.getElementById('tab-content-container');
+        const loader = document.getElementById('loader');
+        const dashboardContent = document.getElementById('dashboard-content');
 
-        function getMonthName(standardDate) {
-            const parts = standardDate.split('-');
-            if(parts.length < 2) return '';
-            return monthsNames[parseInt(parts[1], 10) - 1];
-        }
+        /**
+         * Parsea texto en formato CSV a un array de objetos.
+         * Esta nueva versión es más robusta y maneja correctamente las comas dentro de campos.
+         * @param {string} csvText - El texto CSV a parsear.
+         * @returns {Array<Object>} Un array de objetos, donde cada objeto representa una fila.
+         */
+        function parseCSV(csvText) {
+            const lines = csvText.trim().replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+            if (lines.length < 2) return [];
 
-        function formatDateNice(standardDate) {
-            const parts = standardDate.split('-');
-            if(parts.length !== 3) return standardDate;
-            return `${parseInt(parts[2], 10)} de ${getMonthName(standardDate)}`;
-        }
+            const headers = lines[0].split(',').map(h => h.trim());
+            const dataRows = [];
 
-        // 3. Estilos e Iconos dinámicos por Área
-        function getStyleForArea(area) {
-            if (!area) return { color: 'bg-slate-50 text-slate-700 border-slate-200', icon: 'fas fa-book text-slate-400' };
-            
-            const areaLower = area.toLowerCase();
-            if (areaLower.includes('biología')) return { color: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: 'fas fa-leaf text-emerald-500' };
-            if (areaLower.includes('sociales')) return { color: 'bg-amber-50 text-amber-700 border-amber-200', icon: 'fas fa-globe-americas text-amber-500' };
-            if (areaLower.includes('física')) return { color: 'bg-purple-50 text-purple-700 border-purple-200', icon: 'fas fa-atom text-purple-500' };
-            if (areaLower.includes('inglés')) return { color: 'bg-blue-50 text-blue-700 border-blue-200', icon: 'fas fa-language text-blue-500' };
-            if (areaLower.includes('matemática')) return { color: 'bg-red-50 text-red-700 border-red-200', icon: 'fas fa-calculator text-red-500' };
-            if (areaLower.includes('química')) return { color: 'bg-teal-50 text-teal-700 border-teal-200', icon: 'fas fa-flask text-teal-500' };
-            if (areaLower.includes('lectura')) return { color: 'bg-indigo-50 text-indigo-700 border-indigo-200', icon: 'fas fa-book-open text-indigo-500' };
-            if (areaLower.includes('festivo')) return { color: 'bg-slate-100 text-slate-600 border-slate-300', icon: 'fas fa-calendar-times text-slate-400' };
-            if (areaLower.includes('charla')) return { color: 'bg-pink-50 text-pink-700 border-pink-200', icon: 'fas fa-comments text-pink-500' };
-            if (areaLower.includes('simulacro')) return { color: 'bg-orange-50 text-orange-700 border-orange-200', icon: 'fas fa-file-signature text-orange-500' };
-            if (areaLower.includes('evento')) return { color: 'bg-yellow-50 text-yellow-700 border-yellow-200', icon: 'fas fa-glass-cheers text-yellow-500' };
-            if (areaLower.includes('cancelado')) return { color: 'bg-red-50 text-red-700 border-red-200', icon: 'fas fa-ban text-red-500' };
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i];
+                if (!line.trim()) continue;
 
-            return { color: 'bg-slate-50 text-slate-700 border-slate-200', icon: 'fas fa-book text-slate-400' };
-        }
+                const values = [];
+                let currentField = '';
+                let inQuotes = false;
 
-        // 4. Variables Globales y Carga de Datos
-        let scheduleData = [];
-        const grid = document.getElementById('schedule-grid');
-        const noResults = document.getElementById('no-results');
-        const monthFilter = document.getElementById('monthFilter');
-        const areaFilter = document.getElementById('areaFilter');
-        const resultsCount = document.getElementById('resultsCount');
+                for (let j = 0; j < line.length; j++) {
+                    const char = line[j];
 
-        async function loadDataAndInit() {
-            try {
-                grid.innerHTML = '<div class="col-span-full text-center py-10 text-slate-500"><i class="fas fa-spinner fa-spin text-3xl mb-4"></i><br>Cargando cronograma...</div>';
-                
-                let textToProcess = fallbackData;
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        values.push(currentField.trim());
+                        currentField = '';
+                    } else {
+                        currentField += char;
+                    }
+                }
+                values.push(currentField.trim()); // Add the last field
 
-                // Si proporcionaste un enlace de Google Sheets, la página intentará descargarlo
-                if (GOOGLE_SHEETS_CSV_URL && GOOGLE_SHEETS_CSV_URL.trim() !== "") {
-                    try {
-                        const response = await fetch(GOOGLE_SHEETS_CSV_URL);
-                        if(response.ok) {
-                            textToProcess = await response.text();
-                        } else {
-                            console.warn("No se pudo cargar Google Sheets, usando datos de respaldo.");
+                if (values.length === headers.length) {
+                    const entry = {};
+                    headers.forEach((header, index) => {
+                        let value = values[index] || '';
+                        if (value.startsWith('"') && value.endsWith('"')) {
+                            value = value.substring(1, value.length - 1);
                         }
-                    } catch (fetchError) {
-                        console.warn("Error de conexión a Google Sheets, usando datos de respaldo.", fetchError);
+                        entry[header] = value;
+                    });
+                    dataRows.push(entry);
+                } else {
+                    console.warn(`Fila ${i + 1} ignorada: el número de columnas (${values.length}) no coincide con el encabezado (${headers.length}).`);
+                }
+            }
+            return dataRows;
+        }
+
+        function groupDataByObjective(flatData) {
+            const groupedData = {};
+            flatData.forEach(entry => {
+                const objectiveKey = entry.ObjetivoEstrategico;
+                if (!objectiveKey) return;
+
+                if (!groupedData[objectiveKey]) {
+                    groupedData[objectiveKey] = {
+                        objective: entry.DescripcionObjetivoEstrategico,
+                        color: objectiveColors[objectiveKey] || 'gray',
+                        indicators: []
+                    };
+                }
+                
+                const subGoals = [];
+                for (let i = 1; i <= 3; i++) { 
+                    if (entry[`Meta${i}_Valor`]) { 
+                        subGoals.push({
+                            label: entry[`Meta${i}_Etiqueta`] || '', 
+                            goal: entry[`Meta${i}_Valor`],
+                            current: entry[`ValorActual${i}`] || 0
+                        });
                     }
                 }
 
-                // Procesar los datos (ya sean de Google Sheets o el respaldo)
-                const raw = parseCSV(textToProcess.trim());
-                
-                scheduleData = raw.slice(1) // Ignorar encabezado
-                    .filter(row => row.length >= 5 && row[0] && row[0].trim() !== '') // Evitar filas vacías
-                    .map(row => {
-                        const originalDate = row[0].trim();
-                        const standardDate = standardizeDate(originalDate);
-                        return {
-                            fecha_original: originalDate,
-                            fecha_estandar: standardDate,
-                            mes: getMonthName(standardDate),
-                            dia: row[1] ? row[1].trim() : '',
-                            horario: row[2] ? row[2].trim() : '',
-                            area: row[3] ? row[3].trim() : '',
-                            tema: row[4] ? row[4].trim() : ''
-                        };
-                    });
-
-                // Ordenar cronológicamente usando la fecha estándar (YYYY-MM-DD)
-                scheduleData.sort((a, b) => a.fecha_estandar.localeCompare(b.fecha_estandar));
-
-                // Identificar la clase de "Hoy" y la "Próxima"
-                const now = new Date();
-                const year = now.getFullYear();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const day = String(now.getDate()).padStart(2, '0');
-                const todayStr = `${year}-${month}-${day}`;
-                
-                let foundNext = false;
-                scheduleData.forEach(item => {
-                    if (item.fecha_estandar === todayStr) {
-                        item.esHoy = true;
-                    } else if (item.fecha_estandar > todayStr && !foundNext) {
-                        item.esProxima = true;
-                        foundNext = true;
-                    }
+                groupedData[objectiveKey].indicators.push({
+                    id: entry.ID,
+                    name: entry.NombreIndicador,
+                    desc: entry.DescripcionGeneral,
+                    objective: entry.ObjetivoIndicador,
+                    formula: entry.Formula,
+                    periodicity: entry.Periodicidad,
+                    responsible: entry.Responsable,
+                    fechaActualizacion: entry.FechaActualizacion,
+                    subGoals: subGoals 
                 });
-
-                initFilters();
-            } catch (e) {
-                console.error("Error general", e);
-                grid.innerHTML = `<div class="col-span-full text-center py-10 text-red-500 bg-red-50 rounded-xl border border-red-200"><i class="fas fa-exclamation-triangle text-3xl mb-4"></i><br><span class="font-semibold">Error al cargar la información.</span></div>`;
-            }
+            });
+            return groupedData;
+        }
+        
+        function parseValue(valueStr) {
+            if (typeof valueStr !== 'string' || !valueStr) return 0;
+            return parseFloat(valueStr.replace(/,/g, '.').replace(/[^\d.-]/g, '')) || 0;
         }
 
-        // 5. Inicializar Filtros
-        function initFilters() {
-            const uniqueMonths = [...new Set(scheduleData.map(item => item.mes))].filter(Boolean);
-            const uniqueAreas = [...new Set(scheduleData.map(item => item.area))].filter(Boolean);
+        // ========= NUEVO: pestaña "Dashboard" + pestañas dinámicas =========
+        function createTabs(data) {
+            tabsContainer.innerHTML = '';
+            const objectiveKeys = Object.keys(data);
 
-            monthFilter.innerHTML = '<option value="all">🗓️ Todos los meses</option>';
-            areaFilter.innerHTML = '<option value="all">📚 Todas las áreas</option>';
+            // Pestaña fija "Dashboard"
+            const dashboardBtn = document.createElement('button');
+            dashboardBtn.textContent = 'Dashboard';
+            dashboardBtn.className = 'px-4 py-2 font-semibold text-sm rounded-t-lg border-b-2 transition-colors duration-300 tab-inactive';
+            dashboardBtn.dataset.objective = '__dashboard__';
+            dashboardBtn.addEventListener('click', () => switchTab('__dashboard__'));
+            tabsContainer.appendChild(dashboardBtn);
 
-            uniqueMonths.forEach(mes => {
-                const option = document.createElement('option');
-                option.value = mes;
-                option.textContent = mes;
-                monthFilter.appendChild(option);
+            // Pestañas por objetivo (la primera sigue siendo la activa por defecto)
+            objectiveKeys.forEach((objectiveKey, index) => {
+                const button = document.createElement('button');
+                button.textContent = objectiveKey;
+                button.className = `px-4 py-2 font-semibold text-sm rounded-t-lg border-b-2 transition-colors duration-300 ${index === 0 ? 'tab-active' : 'tab-inactive'}`;
+                button.dataset.objective = objectiveKey;
+                button.addEventListener('click', () => switchTab(objectiveKey));
+                tabsContainer.appendChild(button);
             });
-
-            uniqueAreas.forEach(area => {
-                const option = document.createElement('option');
-                option.value = area;
-                option.textContent = area;
-                areaFilter.appendChild(option);
-            });
-
-            monthFilter.addEventListener('change', renderFiltered);
-            areaFilter.addEventListener('change', renderFiltered);
-
-            renderFiltered();
         }
 
-        function renderFiltered() {
-            const selectedMonth = monthFilter.value;
-            const selectedArea = areaFilter.value;
+        // ========= NUEVO: contenido para la pestaña "Dashboard" =========
+        function createContent(data) {
+            contentContainer.innerHTML = '';
 
-            const filtered = scheduleData.filter(item => {
-                const matchMonth = selectedMonth === 'all' || item.mes === selectedMonth;
-                const matchArea = selectedArea === 'all' || item.area === selectedArea;
-                return matchMonth && matchArea;
-            });
+            const objectiveKeys = Object.keys(data);
+            const firstObjectiveKey = objectiveKeys[0];
 
-            grid.innerHTML = '';
-            
-            if (filtered.length === 0) {
-                grid.classList.add('hidden');
-                noResults.classList.remove('hidden');
-            } else {
-                grid.classList.remove('hidden');
-                noResults.classList.add('hidden');
+            // Contenido del Dashboard (Looker Studio) - oculto por defecto
+            const dashboardContentDiv = document.createElement('div');
+            dashboardContentDiv.id = 'content-__dashboard__';
+            dashboardContentDiv.className = 'hidden';
+            dashboardContentDiv.innerHTML = `
+                <div class="bg-white p-4 rounded-lg shadow-sm mb-6 border-l-4 border-indigo-500">
+                    <h2 class="text-xl font-bold text-gray-800">Dashboard general CECP</h2>
+                    <p class="mt-1 text-gray-600">Vista consolidada de indicadores en Looker Studio.</p>
+                </div>
+                <div class="w-full">
+                    <iframe
+                        width="100%"
+                        style="height: 70vh;"
+                        src="https://lookerstudio.google.com/embed/reporting/eced3bb4-5c58-4246-aff2-4256077757bd/page/DCWcF"
+                        frameborder="0"
+                        class="rounded-xl border border-gray-200 shadow-sm"
+                        allowfullscreen
+                        sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
+                    </iframe>
+                </div>
+            `;
+            contentContainer.appendChild(dashboardContentDiv);
+
+            // Contenido por objetivo (el primero visible por defecto)
+            objectiveKeys.forEach((objectiveKey, index) => {
+                const objectiveData = data[objectiveKey];
+                const color = objectiveData.color;
                 
-                filtered.forEach(item => {
-                    const style = getStyleForArea(item.area);
-                    const isFestivo = item.area.toLowerCase().includes('festivo');
-                    const isCancelado = item.area.toLowerCase().includes('cancelado');
-                    
-                    let badgeHtml = '';
-                    let borderShadowClass = 'border-slate-200 hover:shadow-lg';
-                    
-                    // Asignar resaltado según fecha
-                    if (item.esHoy) {
-                        badgeHtml = `<div class="absolute top-0 right-0 bg-rose-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-xl shadow-sm z-10 flex items-center gap-1 animate-pulse"><i class="fas fa-star"></i> ¡HOY!</div>`;
-                        borderShadowClass = 'border-rose-400 ring-2 ring-rose-400 shadow-md shadow-rose-100';
-                    } else if (item.esProxima) {
-                        badgeHtml = `<div class="absolute top-0 right-0 bg-indigo-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg rounded-tr-xl shadow-sm z-10 flex items-center gap-1"><i class="fas fa-arrow-right"></i> PRÓXIMA</div>`;
-                        borderShadowClass = 'border-indigo-400 ring-2 ring-indigo-400 shadow-md shadow-indigo-100';
+                const contentWrapper = document.createElement('div');
+                contentWrapper.id = `content-${objectiveKey.replace(/\s+/g, '-')}`;
+                contentWrapper.className = index !== 0 ? 'hidden' : '';
+
+                let indicatorsHTML = objectiveData.indicators.map(indicator => {
+                    let progressHTML = '';
+                    if (indicator.subGoals.length > 0) {
+                        if (indicator.subGoals.length === 1) {
+                            const subGoal = indicator.subGoals[0];
+                            const metaValue = parseValue(subGoal.goal);
+                            const currentValue = parseValue(subGoal.current);
+                            let completionPercentage = metaValue > 0 ? (currentValue / metaValue) * 100 : 0;
+                            if (subGoal.goal && subGoal.goal.includes('≤')) {
+                                completionPercentage = metaValue > 0 ? Math.max(0, (1 - (currentValue - metaValue) / metaValue)) * 100 : 0;
+                            }
+                            const displayPercentage = Math.round(completionPercentage);
+                            const progressBarWidth = Math.min(100, displayPercentage);
+                            progressHTML = `
+                                <div class="bg-gray-50 rounded-lg p-3 space-y-3">
+                                    <div class="flex items-center text-sm">
+                                        <span class="font-semibold text-gray-600 w-1/3">Meta:</span>
+                                        <span class="font-bold text-${color}-600">${subGoal.goal}</span>
+                                    </div>
+                                    <div class="flex items-center text-sm">
+                                        <span class="font-semibold text-gray-600 w-1/3">Actual:</span>
+                                        <span class="text-gray-800">${subGoal.current || 'N/A'}</span>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <div class="flex justify-between mb-1">
+                                        <span class="text-sm font-medium text-gray-700">${subGoal.label || 'Cumplimiento'}</span>
+                                        <span class="text-sm font-medium text-${color}-700">${displayPercentage}%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                        <div class="bg-${color}-500 h-2.5 rounded-full progress-bar" style="width: ${progressBarWidth}%"></div>
+                                    </div>
+                                </div>
+                            `;
+                        } else { 
+                            progressHTML = '<div class="bg-gray-50 rounded-lg p-4 space-y-4">' + indicator.subGoals.map(subGoal => {
+                                const metaValue = parseValue(subGoal.goal);
+                                const currentValue = parseValue(subGoal.current);
+                                let completionPercentage = metaValue > 0 ? (currentValue / metaValue) * 100 : 0;
+                                if (subGoal.label && subGoal.label.includes('≤')) {
+                                    completionPercentage = metaValue > 0 ? Math.max(0, (1 - (currentValue - metaValue) / metaValue)) * 100 : 0;
+                                }
+                                const displayPercentage = Math.round(completionPercentage);
+                                const progressBarWidth = Math.min(100, displayPercentage);
+                                return `
+                                    <div>
+                                        <div class="flex justify-between mb-1">
+                                            <span class="text-sm font-medium text-gray-700">${subGoal.label}</span>
+                                            <span class="text-sm font-medium text-${color}-700">${displayPercentage}%</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500">Meta: ${subGoal.goal} / Actual: ${subGoal.current}</p>
+                                        <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                            <div class="bg-${color}-500 h-2 rounded-full progress-bar" style="width: ${progressBarWidth}%"></div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('<div class="border-t border-gray-200"></div>') + '</div>';
+                        }
+                    } else {
+                        progressHTML = '<div class="bg-gray-50 rounded-lg p-3"><p class="text-sm text-gray-500">No hay metas definidas.</p></div>';
                     }
-                    
-                    const card = document.createElement('div');
-                    card.className = `bg-white rounded-xl shadow-sm border ${borderShadowClass} relative overflow-hidden transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full`;
-                    
-                    card.innerHTML = `
-                        ${badgeHtml}
-                        <div class="px-5 py-3 ${style.color} border-b flex items-center justify-between">
-                            <span class="font-bold text-xs uppercase tracking-wider">${item.area}</span>
-                            <i class="${style.icon} text-xl"></i>
-                        </div>
-                        <div class="p-6 flex-grow flex flex-col justify-center">
-                            <div class="flex items-center text-slate-500 text-sm mb-2 font-medium">
-                                <i class="far fa-calendar-alt w-5"></i> 
-                                ${item.dia}, ${formatDateNice(item.fecha_estandar)}
+
+                    return `
+                        <div class="bg-white rounded-xl shadow-md border border-gray-200/80 flex flex-col transition-shadow duration-300 hover:shadow-xl">
+                            <div class="p-5 flex-grow">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="text-lg font-bold text-gray-800 pr-2">${indicator.name}</h3>
+                                    <span class="text-xs font-bold text-white bg-${color}-500 rounded-full px-2.5 py-1 flex-shrink-0">${indicator.id}</span>
+                                </div>
+                                <p class="text-sm text-gray-500 mt-2 mb-4">${indicator.objective}</p>
+                                
+                                ${progressHTML}
+                                
+                                <div class="mt-3 text-xs text-gray-400 flex items-center justify-end">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    <span>Última act: ${indicator.fechaActualizacion || 'No disponible'}</span>
+                                </div>
                             </div>
-                            <div class="flex items-center text-slate-500 text-sm mb-4 font-medium">
-                                <i class="far fa-clock w-5"></i> 
-                                ${item.horario}
+                            <div class="px-5 pb-5 mt-auto">
+                                <div class="details-section mt-4 pt-4 border-t border-gray-200 text-sm space-y-3" data-indicator-id="${indicator.id}">
+                                    <p><strong class="text-gray-600 block">Descripción:</strong> <span class="text-gray-500">${indicator.desc}</span></p>
+                                    <p><strong class="text-gray-600 block">Fórmula:</strong> <span class="text-gray-500">${indicator.formula}</span></p>
+                                    <p><strong class="text-gray-600 block">Periodicidad:</strong> <span class="text-gray-500">${indicator.periodicity}</span></p>
+                                </div>
+                                <button onclick="toggleDetails(this, ${indicator.id})" class="details-button mt-4 w-full text-center text-sm font-semibold py-2 px-4 rounded-lg">
+                                    Ver más detalles
+                                </button>
                             </div>
-                            <h3 class="text-lg font-bold ${isFestivo || isCancelado ? 'text-slate-500 line-through' : 'text-slate-800'} leading-tight mt-auto">
-                                ${item.tema}
-                            </h3>
                         </div>
                     `;
-                    grid.appendChild(card);
-                });
+                }).join('');
+
+                contentWrapper.innerHTML = `
+                    <div class="bg-white p-4 rounded-lg shadow-sm mb-6 border-l-4 border-${color}-500">
+                        <h2 class="text-xl font-bold text-gray-800">Objetivo Estratégico</h2>
+                        <p class="mt-1 text-gray-600">${objectiveData.objective}</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${indicatorsHTML}
+                    </div>
+                `;
+                contentContainer.appendChild(contentWrapper);
+            });
+        }
+
+        function switchTab(key) {
+            // Actualizar estilos de pestañas
+            tabsContainer.querySelectorAll('button').forEach(button => {
+                const isActive = button.dataset.objective === key;
+                button.classList.toggle('tab-active', isActive);
+                button.classList.toggle('tab-inactive', !isActive);
+            });
+
+            // Ocultar todo el contenido
+            contentContainer.querySelectorAll('div[id^="content-"]').forEach(content => {
+                content.classList.add('hidden');
+            });
+
+            // Normalizar clave para encontrar el contenido
+            const normalizedKey = key === '__dashboard__' ? '__dashboard__' : key.replace(/\s+/g, '-');
+            const activeContent = document.getElementById(`content-${normalizedKey}`);
+            if (activeContent) {
+                activeContent.classList.remove('hidden');
             }
-
-            // Actualizar contador
-            resultsCount.innerHTML = `<i class="fas fa-check-circle mr-1"></i> ${filtered.length} clase${filtered.length !== 1 ? 's' : ''}`;
         }
 
-        function resetFilters() {
-            monthFilter.value = 'all';
-            areaFilter.value = 'all';
-            renderFiltered();
+        function toggleDetails(button, indicatorId) {
+            const detailsSection = document.querySelector(`.details-section[data-indicator-id='${indicatorId}']`);
+            detailsSection.classList.toggle('open');
+            button.textContent = detailsSection.classList.contains('open') ? 'Ocultar detalles' : 'Ver más detalles';
         }
 
-        // Iniciar la aplicación cuando cargue la página
-        document.addEventListener('DOMContentLoaded', loadDataAndInit);
+        async function main() {
+            try {
+                const response = await fetch(googleSheetUrl);
+                if (!response.ok) {
+                    throw new Error(`Error al cargar los datos: ${response.status} ${response.statusText}`);
+                }
+                const csvText = await response.text();
+                if (csvText.trim().split('\n').length < 2) {
+                    throw new Error("El archivo CSV está vacío o no tiene datos.");
+                }
+                const flatData = parseCSV(csvText);
+                const groupedData = groupDataByObjective(flatData);
+                
+                createTabs(groupedData);
+                createContent(groupedData);
+
+                loader.classList.add('hidden');
+                dashboardContent.classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Error al cargar o procesar los datos:', error);
+                loader.innerHTML = `<p class="text-red-500 font-semibold text-center">No se pudieron cargar los datos. <br>Revisa la URL y la configuración de tu Google Sheet. <br><small class="text-gray-500">Detalle: ${error.message}</small></p>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', main);
+
     </script>
 </body>
 </html>
